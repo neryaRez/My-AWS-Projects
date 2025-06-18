@@ -3,10 +3,10 @@ from aws_cdk import (
     Stack,
     aws_ec2 as ec2,
     aws_efs as efs,
-    aws_autoscaling as autoscaling,
     aws_iam as iam,
     CfnOutput
 )
+from aws_cdk import aws_autoscaling as autoscaling
 from constructs import Construct
 
 class EfStack(Stack):
@@ -25,97 +25,42 @@ class EfStack(Stack):
             )]
         )
 
-        # # 2. Security Group
-        # sg = ec2.SecurityGroup(self, "InstanceSG",
-        #     vpc=vpc,
-        #     description="Allow HTTP, SSH, NFS",
-        #     allow_all_outbound=True
-        # )
-        # sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "SSH")
-        # sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(80), "HTTP")
-        # sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(2049), "NFS")
-        # sg.add_ingress_rule(peer=sg, connection=ec2.Port.tcp(2049), description="Self NFS access")
-
-        # 3. EFS
-        # file_system = efs.FileSystem(self, "MyEFS",
-        #     vpc=vpc,
-        #     lifecycle_policy=efs.LifecyclePolicy.AFTER_7_DAYS,
-        #     performance_mode=efs.PerformanceMode.GENERAL_PURPOSE,
-        #     removal_policy=cdk.RemovalPolicy.DESTROY,
-        #     encrypted=False,
-        # )
-        # efs_sg = file_system.connections.security_groups[0]
-        # efs_sg.add_ingress_rule(peer=sg, connection=ec2.Port.tcp(2049), description="Allow NFS from EC2 SG")
-        # efs_sg.add_ingress_rule(peer=ec2.Peer.ipv4(vpc.vpc_cidr_block), connection=ec2.Port.tcp(2049), description="Allow NFS from VPC CIDR")
-        # efs_sg.add_ingress_rule(peer=ec2.Peer.ipv4(vpcc.vpc_cidr_block), connection=ec2.Port.tcp(22), description="Allow SSH from VPC CIDR")
-        # efs_sg.add_ingress_rule(peer=ec2.Peer.ipv4(vpc.vpc_cidr_block), connection=ec2.Port.tcp(80), description="Allow HTTP from VPC CIDR")
-        # # Add resource policy to allow access from mount targets
-        # file_system.add_to_resource_policy(
-        #         iam.PolicyStatement(
-        #         effect=iam.Effect.ALLOW,
-        #         principals=[iam.AnyPrincipal()],
-        #         actions=[
-        #             "elasticfilesystem:ClientMount",
-        #             "elasticfilesystem:ClientWrite",
-        #             "elasticfilesystem:ClientRootAccess"
-        #         ],
-        #         conditions={
-        #             "Bool": {
-        #                 "elasticfilesystem:AccessedViaMountTarget": "true"
-        #             }
-        #         },
-        #         resources=[file_system.file_system_arn]
-        #     )
-        # )
-
-        # # 4. Outputs with export names
-        # CfnOutput(self, "VPCId", value=vpc.vpc_id, export_name="EfsStack-VPCId")
-        # CfnOutput(self, "Subnet1", value=vpc.public_subnets[0].subnet_id, export_name="EfsStack-Subnet1")
-        # CfnOutput(self, "Subnet2", value=vpc.public_subnets[1].subnet_id, export_name="EfsStack-Subnet2")
-        # CfnOutput(self, "EfsId", value=file_system.file_system_id, export_name="EfsStack-EfsId")
-        # CfnOutput(self, "EfsDns", value=f"{file_system.file_system_id}.efs.{self.region}.amazonaws.com", export_name="EfsStack-EfsDns")
-        # CfnOutput(self, "SecurityGroupId", value=efs_sg, export_name="EfsStack-SecurityGroupId")
-
-        # 2. EFS
-        file_system = efs.FileSystem(self, "MyEFS",
+        # 2. Security Group
+        sg = ec2.SecurityGroup(self, "InstanceSG",
             vpc=vpc,
-            lifecycle_policy=efs.LifecyclePolicy.AFTER_7_DAYS,
-            performance_mode=efs.PerformanceMode.GENERAL_PURPOSE,
-            removal_policy=cdk.RemovalPolicy.DESTROY,
+            description="Allow HTTP, SSH, HTTPS access",
+            allow_all_outbound=True
+        )
+        sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(22), "SSH")
+        sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(80), "HTTP")
+        sg.add_ingress_rule(ec2.Peer.any_ipv4(), ec2.Port.tcp(443), "HTTPS")
+
+        # 3. EFS (Manual Mount Targets to avoid circular dependency)
+        file_system = efs.CfnFileSystem(self, "MyEFS",
+            performance_mode="generalPurpose",
             encrypted=False,
+            lifecycle_policies=[{"transitionToIa": "AFTER_7_DAYS"}]
+        )
+        
+        efs.CfnMountTarget(self, "EfsMountTarget1",
+            file_system_id=file_system.ref,
+            subnet_id=vpc.public_subnets[0].subnet_id,
+            security_groups=[sg.security_group_id]
         )
 
-        efs_sg = file_system.connections.security_groups[0]
-        efs_sg.add_ingress_rule(peer=ec2.Peer.ipv4(vpc.vpc_cidr_block), connection=ec2.Port.tcp(2049), description="Allow NFS from VPC CIDR")
-        efs_sg.add_ingress_rule(peer=ec2.Peer.ipv4(vpc.vpc_cidr_block), connection=ec2.Port.tcp(22), description="Allow SSH from VPC CIDR")
-        efs_sg.add_ingress_rule(peer=ec2.Peer.ipv4(vpc.vpc_cidr_block), connection=ec2.Port.tcp(80), description="Allow HTTP from VPC CIDR")
-
-        # Add resource policy
-        file_system.add_to_resource_policy(
-            iam.PolicyStatement(
-                effect=iam.Effect.ALLOW,
-                principals=[iam.AnyPrincipal()],
-                actions=[
-                    "elasticfilesystem:ClientMount",
-                    "elasticfilesystem:ClientWrite",
-                    "elasticfilesystem:ClientRootAccess"
-                ],
-                conditions={
-                    "Bool": {
-                        "elasticfilesystem:AccessedViaMountTarget": "true"
-                    }
-                },
-                resources=[file_system.file_system_arn]
-            )
+        efs.CfnMountTarget(self, "EfsMountTarget2",
+            file_system_id=file_system.ref,
+            subnet_id=vpc.public_subnets[1].subnet_id,
+            security_groups=[sg.security_group_id]
         )
 
         # 4. Outputs with export names
         CfnOutput(self, "VPCId", value=vpc.vpc_id, export_name="EfsStack-VPCId")
         CfnOutput(self, "Subnet1", value=vpc.public_subnets[0].subnet_id, export_name="EfsStack-Subnet1")
         CfnOutput(self, "Subnet2", value=vpc.public_subnets[1].subnet_id, export_name="EfsStack-Subnet2")
-        CfnOutput(self, "EfsId", value=file_system.file_system_id, export_name="EfsStack-EfsId")
-        CfnOutput(self, "EfsDns", value=f"{file_system.file_system_id}.efs.{self.region}.amazonaws.com", export_name="EfsStack-EfsDns")
-        CfnOutput(self, "SecurityGroupId", value=efs_sg.security_group_id, export_name="EfsStack-SecurityGroupId")
+        CfnOutput(self, "EfsId", value=file_system.ref, export_name="EfsStack-EfsId")
+        CfnOutput(self, "EfsDns", value=f"{file_system.ref}.efs.{self.region}.amazonaws.com", export_name="EfsStack-EfsDns")
+        CfnOutput(self, "SecurityGroupId", value=sg.security_group_id, export_name="EfsStack-SecurityGroupId")
 
 class AutoScalingGroupStack(Stack):
 
@@ -204,9 +149,9 @@ class AutoScalingGroupStack(Stack):
         )
 
         efs_sg = ec2.SecurityGroup.from_security_group_id(self, "ImportedEfsSG",
-        security_group_id=cdk.Fn.import_value("EfsSecurityGroupId")
+        security_group_id=cdk.Fn.import_value("EfsStack-SecurityGroupId")
         )
-    
+
         asg_sg = ec2.SecurityGroup(self, "ASGSecurityGroup",
             vpc=vpc,
             description="Allow NFS access to EFS",
@@ -222,9 +167,8 @@ class AutoScalingGroupStack(Stack):
             connection=ec2.Port.tcp(2049),
             description="Allow NFS access from ASG SG"
         )
-    
+
         # CPU Scaling Policy (sensitive to stress test)
         asg.scale_on_cpu_utilization("ScaleOnCPU",
             target_utilization_percent=60
         )
-
