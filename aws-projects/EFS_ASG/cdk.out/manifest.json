@@ -1,0 +1,724 @@
+{
+  "version": "44.0.0",
+  "artifacts": {
+    "EfStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "EfStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "EfStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/unknown-region",
+      "properties": {
+        "templateFile": "EfStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/b473b2bf810ce6e31206c9e37c4c33339b1d516d4bd3379811bb4540d433b9f4.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "EfStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "EfStack.assets"
+      ],
+      "metadata": {
+        "/EfStack/MyVPC": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "enableDnsHostnames": true,
+              "enableDnsSupport": true,
+              "maxAzs": "*",
+              "natGateways": "*",
+              "subnetConfiguration": [
+                {
+                  "name": "*",
+                  "subnetType": "Public",
+                  "cidrMask": "*"
+                }
+              ]
+            }
+          }
+        ],
+        "/EfStack/MyVPC/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCAFB07A31"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "availabilityZone": "*",
+              "vpcId": "*",
+              "cidrBlock": "*",
+              "mapPublicIpOnLaunch": true,
+              "ipv6CidrBlock": "*",
+              "assignIpv6AddressOnCreation": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "availabilityZone": "*",
+              "vpcId": "*",
+              "cidrBlock": "*",
+              "mapPublicIpOnLaunch": true,
+              "ipv6CidrBlock": "*",
+              "assignIpv6AddressOnCreation": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {}
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet1Subnet0B09E184"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet1RouteTableF452D270"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet1RouteTableAssociation61BB7007"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet1DefaultRoute064E2CB1"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "availabilityZone": "*",
+              "vpcId": "*",
+              "cidrBlock": "*",
+              "mapPublicIpOnLaunch": true,
+              "ipv6CidrBlock": "*",
+              "assignIpv6AddressOnCreation": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "availabilityZone": "*",
+              "vpcId": "*",
+              "cidrBlock": "*",
+              "mapPublicIpOnLaunch": true,
+              "ipv6CidrBlock": "*",
+              "assignIpv6AddressOnCreation": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {}
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet2SubnetF1A4E852"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet2RouteTableD03A1158"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet2RouteTableAssociationE1106DF5"
+          }
+        ],
+        "/EfStack/MyVPC/publicSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCpublicSubnet2DefaultRoute0CED5BC7"
+          }
+        ],
+        "/EfStack/MyVPC/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCIGW30AB6DD6"
+          }
+        ],
+        "/EfStack/MyVPC/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCVPCGWE6F260E1"
+          }
+        ],
+        "/EfStack/MyVPC/RestrictDefaultSecurityGroupCustomResource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/EfStack/MyVPC/RestrictDefaultSecurityGroupCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyVPCRestrictDefaultSecurityGroupCustomResourceC3FF5EE0"
+          }
+        ],
+        "/EfStack/Custom::VpcRestrictDefaultSGCustomResourceProvider": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+            "data": true
+          }
+        ],
+        "/EfStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+          }
+        ],
+        "/EfStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E"
+          }
+        ],
+        "/EfStack/InstanceSG": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "vpc": "*",
+              "allowAllOutbound": true,
+              "description": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": true,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*",
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": true,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*",
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": true,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/EfStack/InstanceSG/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InstanceSG2AE1100C"
+          }
+        ],
+        "/EfStack/MyEFS": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyEFS"
+          }
+        ],
+        "/EfStack/EfsMountTarget1": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "EfsMountTarget1"
+          }
+        ],
+        "/EfStack/EfsMountTarget2": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "EfsMountTarget2"
+          }
+        ],
+        "/EfStack/VPCId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VPCId"
+          }
+        ],
+        "/EfStack/Subnet1": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Subnet1"
+          }
+        ],
+        "/EfStack/Subnet2": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "Subnet2"
+          }
+        ],
+        "/EfStack/EfsId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "EfsId"
+          }
+        ],
+        "/EfStack/EfsDns": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "EfsDns"
+          }
+        ],
+        "/EfStack/SecurityGroupId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecurityGroupId"
+          }
+        ],
+        "/EfStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/EfStack/CDKMetadata/Condition": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadataAvailable"
+          }
+        ],
+        "/EfStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/EfStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "EfStack"
+    },
+    "AutoScalingGroupStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "AutoScalingGroupStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "AutoScalingGroupStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/unknown-region",
+      "properties": {
+        "templateFile": "AutoScalingGroupStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/db1620230ff5b665f31a437973225a372e16516fec2fbd4fdfd36591c662f84e.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "AutoScalingGroupStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "AutoScalingGroupStack.assets"
+      ],
+      "metadata": {
+        "/AutoScalingGroupStack/VPC": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/AutoScalingGroupStack/VPC/PublicSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:warning",
+            "data": "No routeTableId was provided to the subnet at 'AutoScalingGroupStack/VPC/PublicSubnet1'. Attempting to read its .routeTable.routeTableId will return null/undefined. (More info: https://github.com/aws/aws-cdk/pull/3171) [ack: @aws-cdk/aws-ec2:noSubnetRouteTableId]",
+            "trace": [
+              "Annotations.addMessage (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1709)",
+              "Annotations.addWarningV2 (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:896)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:38615)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:488)",
+              "Subnet2.fromSubnetAttributes (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:24516)",
+              "/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/util.js:1:2307",
+              "Array.map (<anonymous>)",
+              "ImportSubnetGroup.import (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/util.js:1:2225)",
+              "new ImportedVpc (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:35213)",
+              "new ImportedVpc (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:488)",
+              "Vpc2.fromVpcAttributes (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:9085)",
+              "/tmp/tmpxjzk2q0y/lib/program.js:315:152",
+              "Kernel._Kernel_ensureSync (/tmp/tmpxjzk2q0y/lib/program.js:916:24)",
+              "Kernel.sinvoke (/tmp/tmpxjzk2q0y/lib/program.js:315:102)",
+              "KernelHost.processRequest (/tmp/tmpxjzk2q0y/lib/program.js:15467:36)",
+              "KernelHost.run (/tmp/tmpxjzk2q0y/lib/program.js:15427:22)",
+              "Immediate._onImmediate (/tmp/tmpxjzk2q0y/lib/program.js:15428:46)",
+              "process.processImmediate (node:internal/timers:483:21)"
+            ]
+          }
+        ],
+        "/AutoScalingGroupStack/VPC/PublicSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:warning",
+            "data": "No routeTableId was provided to the subnet at 'AutoScalingGroupStack/VPC/PublicSubnet2'. Attempting to read its .routeTable.routeTableId will return null/undefined. (More info: https://github.com/aws/aws-cdk/pull/3171) [ack: @aws-cdk/aws-ec2:noSubnetRouteTableId]",
+            "trace": [
+              "Annotations.addMessage (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1709)",
+              "Annotations.addWarningV2 (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:896)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:38615)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:488)",
+              "Subnet2.fromSubnetAttributes (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:24516)",
+              "/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/util.js:1:2307",
+              "Array.map (<anonymous>)",
+              "ImportSubnetGroup.import (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/util.js:1:2225)",
+              "new ImportedVpc (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:35213)",
+              "new ImportedVpc (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:488)",
+              "Vpc2.fromVpcAttributes (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:9085)",
+              "/tmp/tmpxjzk2q0y/lib/program.js:315:152",
+              "Kernel._Kernel_ensureSync (/tmp/tmpxjzk2q0y/lib/program.js:916:24)",
+              "Kernel.sinvoke (/tmp/tmpxjzk2q0y/lib/program.js:315:102)",
+              "KernelHost.processRequest (/tmp/tmpxjzk2q0y/lib/program.js:15467:36)",
+              "KernelHost.run (/tmp/tmpxjzk2q0y/lib/program.js:15427:22)",
+              "Immediate._onImmediate (/tmp/tmpxjzk2q0y/lib/program.js:15428:46)",
+              "process.processImmediate (node:internal/timers:483:21)"
+            ]
+          }
+        ],
+        "/AutoScalingGroupStack/ASGInstanceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "assumedBy": {
+                "principalAccount": "*",
+                "assumeRoleAction": "*"
+              },
+              "managedPolicies": [
+                {
+                  "managedPolicyArn": "*"
+                },
+                {
+                  "managedPolicyArn": "*"
+                }
+              ]
+            }
+          }
+        ],
+        "/AutoScalingGroupStack/ASGInstanceRole/ImportASGInstanceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/AutoScalingGroupStack/ASGInstanceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ASGInstanceRoleF78C7398"
+          }
+        ],
+        "/AutoScalingGroupStack/ASGLaunchTemplate": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "instanceType": "*",
+              "keyName": "*",
+              "machineImage": "*",
+              "role": "*",
+              "securityGroup": "*",
+              "userData": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addSecurityGroup": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/AutoScalingGroupStack/ASGLaunchTemplate/Profile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ASGLaunchTemplateProfile3A22EA2B"
+          }
+        ],
+        "/AutoScalingGroupStack/ASGLaunchTemplate/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ASGLaunchTemplate19FE6236"
+          }
+        ],
+        "/AutoScalingGroupStack/SsmParameterValue:--aws--service--ami-amazon-linux-latest--amzn2-ami-hvm-x86_64-gp2:C96584B6-F00A-464E-AD19-53AFF4B05118.Parameter": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+          }
+        ],
+        "/AutoScalingGroupStack/Subnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:warning",
+            "data": "No routeTableId was provided to the subnet at 'AutoScalingGroupStack/Subnet1'. Attempting to read its .routeTable.routeTableId will return null/undefined. (More info: https://github.com/aws/aws-cdk/pull/3171) [ack: @aws-cdk/aws-ec2:noSubnetRouteTableId]",
+            "trace": [
+              "Annotations.addMessage (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1709)",
+              "Annotations.addWarningV2 (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:896)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:38615)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:488)",
+              "Subnet2.fromSubnetAttributes (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:24516)",
+              "Subnet2.fromSubnetId (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:24602)",
+              "/tmp/tmpxjzk2q0y/lib/program.js:315:152",
+              "Kernel._Kernel_ensureSync (/tmp/tmpxjzk2q0y/lib/program.js:916:24)",
+              "Kernel.sinvoke (/tmp/tmpxjzk2q0y/lib/program.js:315:102)",
+              "KernelHost.processRequest (/tmp/tmpxjzk2q0y/lib/program.js:15467:36)",
+              "KernelHost.run (/tmp/tmpxjzk2q0y/lib/program.js:15427:22)",
+              "Immediate._onImmediate (/tmp/tmpxjzk2q0y/lib/program.js:15428:46)",
+              "process.processImmediate (node:internal/timers:483:21)"
+            ]
+          }
+        ],
+        "/AutoScalingGroupStack/Subnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:warning",
+            "data": "No routeTableId was provided to the subnet at 'AutoScalingGroupStack/Subnet2'. Attempting to read its .routeTable.routeTableId will return null/undefined. (More info: https://github.com/aws/aws-cdk/pull/3171) [ack: @aws-cdk/aws-ec2:noSubnetRouteTableId]",
+            "trace": [
+              "Annotations.addMessage (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1709)",
+              "Annotations.addWarningV2 (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/annotations.js:1:896)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:38615)",
+              "new ImportedSubnet (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:488)",
+              "Subnet2.fromSubnetAttributes (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:24516)",
+              "Subnet2.fromSubnetId (/tmp/jsii-kernel-9wEaI4/node_modules/aws-cdk-lib/aws-ec2/lib/vpc.js:1:24602)",
+              "/tmp/tmpxjzk2q0y/lib/program.js:315:152",
+              "Kernel._Kernel_ensureSync (/tmp/tmpxjzk2q0y/lib/program.js:916:24)",
+              "Kernel.sinvoke (/tmp/tmpxjzk2q0y/lib/program.js:315:102)",
+              "KernelHost.processRequest (/tmp/tmpxjzk2q0y/lib/program.js:15467:36)",
+              "KernelHost.run (/tmp/tmpxjzk2q0y/lib/program.js:15427:22)",
+              "Immediate._onImmediate (/tmp/tmpxjzk2q0y/lib/program.js:15428:46)",
+              "process.processImmediate (node:internal/timers:483:21)"
+            ]
+          }
+        ],
+        "/AutoScalingGroupStack/MyASG": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "maxCapacity": "*",
+              "minCapacity": "*",
+              "vpcSubnets": {
+                "subnets": [
+                  "*",
+                  "*"
+                ]
+              },
+              "vpc": "*",
+              "launchTemplate": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addSecurityGroup": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/AutoScalingGroupStack/MyASG/ASG": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyASG63588E97"
+          }
+        ],
+        "/AutoScalingGroupStack/MyASG/ScalingPolicyScaleOnCPU/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyASGScalingPolicyScaleOnCPUAE0A7814"
+          }
+        ],
+        "/AutoScalingGroupStack/ImportedEfsSG/from AutoScalingGroupStackASGSecurityGroup680F630E:2049": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImportedEfsSGfromAutoScalingGroupStackASGSecurityGroup680F630E2049DF62E6CD"
+          }
+        ],
+        "/AutoScalingGroupStack/ASGSecurityGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "vpc": "*",
+              "allowAllOutbound": true,
+              "description": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                "*",
+                {},
+                "*",
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": true,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*",
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": true,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*",
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": true,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/AutoScalingGroupStack/ASGSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ASGSecurityGroup3960D0B6"
+          }
+        ],
+        "/AutoScalingGroupStack/ASGSecurityGroup/from AutoScalingGroupStackImportedEfsSG0380E410:2049": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ASGSecurityGroupfromAutoScalingGroupStackImportedEfsSG0380E410204919872594"
+          }
+        ],
+        "/AutoScalingGroupStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/AutoScalingGroupStack/CDKMetadata/Condition": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadataAvailable"
+          }
+        ],
+        "/AutoScalingGroupStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/AutoScalingGroupStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "AutoScalingGroupStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  },
+  "minimumCliVersion": "2.1018.1"
+}

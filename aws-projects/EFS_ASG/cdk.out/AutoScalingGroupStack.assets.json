@@ -1,0 +1,20 @@
+{
+  "version": "44.0.0",
+  "files": {
+    "db1620230ff5b665f31a437973225a372e16516fec2fbd4fdfd36591c662f84e": {
+      "displayName": "AutoScalingGroupStack Template",
+      "source": {
+        "path": "AutoScalingGroupStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "db1620230ff5b665f31a437973225a372e16516fec2fbd4fdfd36591c662f84e.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

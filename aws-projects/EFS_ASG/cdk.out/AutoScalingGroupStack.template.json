@@ -1,0 +1,599 @@
+{
+ "Resources": {
+  "ASGInstanceRoleF78C7398": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ec2.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonElasticFileSystemClientFullAccess"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/ASGInstanceRole/Resource"
+   }
+  },
+  "ASGLaunchTemplateProfile3A22EA2B": {
+   "Type": "AWS::IAM::InstanceProfile",
+   "Properties": {
+    "Roles": [
+     {
+      "Ref": "ASGInstanceRoleF78C7398"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/ASGLaunchTemplate/Profile"
+   }
+  },
+  "ASGLaunchTemplate19FE6236": {
+   "Type": "AWS::EC2::LaunchTemplate",
+   "Properties": {
+    "LaunchTemplateData": {
+     "IamInstanceProfile": {
+      "Arn": {
+       "Fn::GetAtt": [
+        "ASGLaunchTemplateProfile3A22EA2B",
+        "Arn"
+       ]
+      }
+     },
+     "ImageId": {
+      "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+     },
+     "InstanceType": "t3.micro",
+     "KeyName": "Nery-Pair",
+     "SecurityGroupIds": [
+      {
+       "Fn::ImportValue": "EfsStack-SecurityGroupId"
+      },
+      {
+       "Fn::GetAtt": [
+        "ASGSecurityGroup3960D0B6",
+        "GroupId"
+       ]
+      }
+     ],
+     "TagSpecifications": [
+      {
+       "ResourceType": "instance",
+       "Tags": [
+        {
+         "Key": "Name",
+         "Value": "AutoScalingGroupStack/ASGLaunchTemplate"
+        }
+       ]
+      },
+      {
+       "ResourceType": "volume",
+       "Tags": [
+        {
+         "Key": "Name",
+         "Value": "AutoScalingGroupStack/ASGLaunchTemplate"
+        }
+       ]
+      }
+     ],
+     "UserData": {
+      "Fn::Base64": {
+       "Fn::Join": [
+        "",
+        [
+         "#!/bin/bash\nEFS_ID=\"",
+         {
+          "Fn::ImportValue": "EfsStack-EfsId"
+         },
+         "\"\nREGION=\"",
+         {
+          "Ref": "AWS::Region"
+         },
+         "\"\nyum update -y\nyum install -y nfs-utils amazon-efs-utils gcc make autoconf automake unzip curl\nmkdir -p /mnt/efs\nfor i in {1..60}; do nslookup \"$EFS_ID.efs.$REGION.amazonaws.com\" && break || sleep 10; done\nif mount -t efs -o tls ${EFS_ID}:/ /mnt/efs; then\necho 'Mounted with TLS successfully' >> /var/log/efs-mount.log\nelif mount -t nfs4 -o nfsvers=4.1 ${EFS_ID}.efs.${REGION}.amazonaws.com:/ /mnt/efs; then\necho 'Mounted without TLS (fallback to NFS)' >> /var/log/efs-mount.log\nelse\necho 'Mount failed' >> /var/log/efs-mount.log\nexit 1\nfi\nID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)\necho \"Hello from $ID\" > /mnt/efs/$ID.txt\nchmod 777 /mnt/efs\nchmod 777 /mnt/efs/$ID.txt\ncd /home/ec2-user\ncurl -LO https://github.com/resurrecting-open-source-projects/stress/archive/refs/heads/master.zip\nunzip master.zip\ncd stress-master\n./autogen.sh || true\n./configure || true\nmake || true\nmake install || true"
+        ]
+       ]
+      }
+     }
+    },
+    "TagSpecifications": [
+     {
+      "ResourceType": "launch-template",
+      "Tags": [
+       {
+        "Key": "Name",
+        "Value": "AutoScalingGroupStack/ASGLaunchTemplate"
+       }
+      ]
+     }
+    ]
+   },
+   "DependsOn": [
+    "ASGInstanceRoleF78C7398"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/ASGLaunchTemplate/Resource"
+   }
+  },
+  "MyASG63588E97": {
+   "Type": "AWS::AutoScaling::AutoScalingGroup",
+   "Properties": {
+    "LaunchTemplate": {
+     "LaunchTemplateId": {
+      "Ref": "ASGLaunchTemplate19FE6236"
+     },
+     "Version": {
+      "Fn::GetAtt": [
+       "ASGLaunchTemplate19FE6236",
+       "LatestVersionNumber"
+      ]
+     }
+    },
+    "MaxSize": "4",
+    "MinSize": "2",
+    "VPCZoneIdentifier": [
+     {
+      "Fn::ImportValue": "EfsStack-Subnet1"
+     },
+     {
+      "Fn::ImportValue": "EfsStack-Subnet2"
+     }
+    ]
+   },
+   "UpdatePolicy": {
+    "AutoScalingScheduledAction": {
+     "IgnoreUnmodifiedGroupSizeProperties": true
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/MyASG/ASG"
+   }
+  },
+  "MyASGScalingPolicyScaleOnCPUAE0A7814": {
+   "Type": "AWS::AutoScaling::ScalingPolicy",
+   "Properties": {
+    "AutoScalingGroupName": {
+     "Ref": "MyASG63588E97"
+    },
+    "PolicyType": "TargetTrackingScaling",
+    "TargetTrackingConfiguration": {
+     "PredefinedMetricSpecification": {
+      "PredefinedMetricType": "ASGAverageCPUUtilization"
+     },
+     "TargetValue": 60
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/MyASG/ScalingPolicyScaleOnCPU/Resource"
+   }
+  },
+  "ImportedEfsSGfromAutoScalingGroupStackASGSecurityGroup680F630E2049DF62E6CD": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow NFS access from ASG SG",
+    "FromPort": 2049,
+    "GroupId": {
+     "Fn::ImportValue": "EfsStack-SecurityGroupId"
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ASGSecurityGroup3960D0B6",
+      "GroupId"
+     ]
+    },
+    "ToPort": 2049
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/ImportedEfsSG/from AutoScalingGroupStackASGSecurityGroup680F630E:2049"
+   }
+  },
+  "ASGSecurityGroup3960D0B6": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Allow NFS access to EFS",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "SSH access from anywhere",
+      "FromPort": 22,
+      "IpProtocol": "tcp",
+      "ToPort": 22
+     },
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "HTTP access from anywhere",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     },
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "HTTPS access from anywhere",
+      "FromPort": 443,
+      "IpProtocol": "tcp",
+      "ToPort": 443
+     }
+    ],
+    "VpcId": {
+     "Fn::ImportValue": "EfsStack-VPCId"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/ASGSecurityGroup/Resource"
+   }
+  },
+  "ASGSecurityGroupfromAutoScalingGroupStackImportedEfsSG0380E410204919872594": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow NFS access from EFS SG",
+    "FromPort": 2049,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ASGSecurityGroup3960D0B6",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::ImportValue": "EfsStack-SecurityGroupId"
+    },
+    "ToPort": 2049
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/ASGSecurityGroup/from AutoScalingGroupStackImportedEfsSG0380E410:2049"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/9VTTW/bMAz9LdVxULw2veWWdUARYNiCJLcgGBiadbjIlKePZobg/z74q4u7Dti1B0HS0xP1yEfNs/ntXXZ7Axc/w/w8M3zM0jYAnvWGvI0Oaa8+KP3GOGi4+O+JoczSxhraJwXex5LyT7VaJFU5FuQKzBLRRglq0V3sOe2FJQa20sGNViUIFJSvrWFk8mqxTxOsXrqR+6+DQ3PQD0/Sxm7nlfgAgrR29okNNZpwnqUvEAVPOyorA6EVzQNtV1c0aDxT/RXKcVcCnlhoVUIxQs6acekJo+NQPzobqwGLntxnCPCiF/J8O+W1VR30ThW1yIS7ksKR93oC7pN6rnAsqTH2sjTmWwxHGyVXi+AiaZWTR8fVVZU7JUPATWxz6NxNzYupb3KSQpCVGBbqkT4+WhHqTPRj4sI/I63y8bl3HPfwlxGNhhisRzAsRZaWMdhtvxktKeHXA1SAHOqxd1heIc8VbuNRKPj2k/hxuf+T0JWzZtIa/9dOr3XpHbiCws4BnlmK4aj/Ol2O10DTtNAaHJQUyDV6XYeTlY/32d08u7/54ZlnLkrgkrJNP/8GZDsI9EMEAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "AutoScalingGroupStack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Parameters": {
+  "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": {
+   "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+   "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+  },
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-3"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-4"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AWS::Region"
+      },
+      "us-west-2"
+     ]
+    }
+   ]
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
