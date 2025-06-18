@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# AWS CDK
+cdk.out/
+cdk.context.json
+
+# Keys - do not store in repo!
+*.pem
+
+# Local config/scripts
+*.log
+*.env
+*.bat
+*.sh
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
