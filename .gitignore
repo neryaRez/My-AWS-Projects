@@ -19,6 +19,7 @@ cdk.context.json
 *.log
 *.env
 *.sh
+*.yaml
 
 # IDE settings
 .vscode/
