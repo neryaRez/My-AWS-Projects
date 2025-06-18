@@ -18,7 +18,6 @@ cdk.context.json
 # Local config/scripts
 *.log
 *.env
-*.bat
 *.sh
 
 # IDE settings
