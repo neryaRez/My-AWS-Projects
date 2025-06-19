@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import aws_cdk as cdk
-from efs.efs_stack import AutoScalingGroupStack
-from efs.efs_stack import EfStack
+from efs.efs_asg_stacks import AutoScalingGroupStack
+from efs.efs_asg_stacks import EfStack
 
 app = cdk.App()
 efs_stack = EfStack(app, "EfStack")
