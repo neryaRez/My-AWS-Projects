@@ -72,7 +72,8 @@ class AutoScalingGroupStack(Stack):
 
         vpc = ec2.Vpc.from_vpc_attributes(self, "VPC",
         vpc_id=vpc_id,
-         availability_zones=["eu-north-1a", "eu-north-1b"],  # תעדכן לפי ה־region שלך
+         availability_zones=[cdk.Fn.select(0, cdk.Fn.get_azs()),
+                             cdk.Fn.select(1, cdk.Fn.get_azs())],
          public_subnet_ids=[subnet1_id, subnet2_id]
         )
 
@@ -129,7 +130,7 @@ class AutoScalingGroupStack(Stack):
         machine_image=ec2.AmazonLinuxImage(
         generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
         ),
-        key_name="Nery-Pair",
+        key_name="your-key-pair-name",  # Replace with your key pair name
         security_group=sg,
         role=role,
         user_data=user_data
