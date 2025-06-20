@@ -85,6 +85,7 @@ class AutoScalingGroupStack(Stack):
             f"REGION=\"{self.region}\"",
             "yum update -y",
             "yum install -y nfs-utils amazon-efs-utils gcc make autoconf automake unzip curl",
+            "yum install -y awscli",
 
             "mkdir -p /mnt/efs",
 
@@ -93,12 +94,14 @@ class AutoScalingGroupStack(Stack):
             "if mount -t efs -o tls ${EFS_ID}:/ /mnt/efs; then",
             "echo 'Mounted with TLS successfully' >> /var/log/efs-mount.log",
             "echo '${EFS_ID}.efs.${REGION}.amazonaws.com:/ /mnt/efs efs defaults,_netdev,tls 0 0' >> /etc/fstab",
+            "mount -a || echo 'fstab mount failed' >> /var/log/efs-mount.log",
 
             #Fallback to NFS if TLS mount fails
             "elif mount -t nfs4 -o nfsvers=4.1 ${EFS_ID}.efs.${REGION}.amazonaws.com:/ /mnt/efs; then",
             "echo 'Mounted without TLS (fallback to NFS)' >> /var/log/efs-mount.log",
             "echo '${EFS_ID}.efs.${REGION}.amazonaws.com:/ /mnt/efs nfs4 defaults,_netdev 0 0' >> /etc/fstab",
-
+            "mount -a || echo 'fstab mount failed' >> /var/log/efs-mount.log",
+            
             # If both mounts fail, log the error
             "else",
             "echo 'Mount failed' >> /var/log/efs-mount.log",
@@ -127,7 +130,8 @@ class AutoScalingGroupStack(Stack):
             assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("AmazonElasticFileSystemClientFullAccess"),
-                iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore")
+                iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore"),
+                iam.ManagedPolicy.from_aws_managed_policy_name("Amazons3ReadOnlyAccess")
             ]
         )
 
