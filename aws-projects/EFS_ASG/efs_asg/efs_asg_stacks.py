@@ -89,13 +89,17 @@ class AutoScalingGroupStack(Stack):
             "mkdir -p /mnt/efs",
 
             f"for i in {{1..60}}; do nslookup \"$EFS_ID.efs.$REGION.amazonaws.com\" && break || sleep 10; done",
-
+            #Try TLS mount first
             "if mount -t efs -o tls ${EFS_ID}:/ /mnt/efs; then",
             "echo 'Mounted with TLS successfully' >> /var/log/efs-mount.log",
+            "echo '${EFS_ID}.efs.${REGION}.amazonaws.com:/ /mnt/efs efs defaults,_netdev,tls 0 0' >> /etc/fstab",
 
+            #Fallback to NFS if TLS mount fails
             "elif mount -t nfs4 -o nfsvers=4.1 ${EFS_ID}.efs.${REGION}.amazonaws.com:/ /mnt/efs; then",
             "echo 'Mounted without TLS (fallback to NFS)' >> /var/log/efs-mount.log",
+            "echo '${EFS_ID}.efs.${REGION}.amazonaws.com:/ /mnt/efs nfs4 defaults,_netdev 0 0' >> /etc/fstab",
 
+            # If both mounts fail, log the error
             "else",
             "echo 'Mount failed' >> /var/log/efs-mount.log",
             "exit 1",
@@ -103,6 +107,8 @@ class AutoScalingGroupStack(Stack):
 
             "ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)",
             "echo \"Hello from $ID\" > /mnt/efs/$ID.txt",
+            "date >> /mnt/efs/$ID.txt",
+            "sh -c 'mount | grep efs >> /mnt/efs/$ID.txt'",
             "chmod 777 /mnt/efs",
             "chmod 777 /mnt/efs/$ID.txt",
 
