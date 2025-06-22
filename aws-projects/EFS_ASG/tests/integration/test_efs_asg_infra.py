@@ -6,14 +6,14 @@ ec2 = boto3.client("ec2")
 ssm = boto3.client("ssm")
 efs = boto3.client("efs")
 
-BUCKET = "your-bucket-name"
+BUCKET = "asg_efs_checking"
 PREFIX = "efs-check"
 ASG_NAME = "your-asg-name"
 EXPECTED = 4
 MIN_EXPECTED = 2
 WAIT_INTERVAL = 10
-MAX_SCALE_WAIT = 300
-COOLDOWN_WAIT = 300
+MAX_SCALE_WAIT =  600  # Maximum wait time for scale-out in seconds
+COOLDOWN_WAIT = 600  # Cooldown period for scale-in in seconds
 
 def get_efs_dns(efs_id):
     region = boto3.session.Session().region_name
@@ -101,7 +101,7 @@ def collect_mount_info(instance_ids):
                 DocumentName="AWS-RunShellScript",
                 Parameters={"commands": [cmd]}
             )
-            print(f"📤 mount + ls -la נשלח ל־{iid}")
+            print(f"📤 apply mount + ls -la on {iid}")
         except Exception as e:
             print(f"⚠️ error has been occured on {iid}: {e}")
 
@@ -119,7 +119,7 @@ def compare_mount_outputs(instance_ids):
     for iid in instance_ids[1:]:
         other = get_s3_file(f"{PREFIX}/{iid}.txt")
         if other != base:
-            print(f"❌ {iid} לא תואם ל־{instance_ids[0]}")
+            print(f"❌ There are no comparison between the info of {iid} to {instance_ids[0]}")
             return False
 
     print("📂 All the files are the same.")
@@ -128,15 +128,18 @@ def compare_mount_outputs(instance_ids):
 
 def check_scale_in(min_expected):
     waited = 0
-    while waited < COOLDOWN_WAIT + 60:
+    while waited < COOLDOWN_WAIT:
         ids = get_instance_ids()
-        print(f"📉 נותרו {len(ids)} מכונות אחרי cooldown")
+        
+        if waited % 60 == 0:
+            print(f" 📉 waited {waited} seconds, checking scale-in. Current count: {len(ids)}")
+        
         if len(ids) <= min_expected:
-            print("✅ scale-in הצליח. חזרנו למינימום.")
+            print("✅ scale-in  check passed, instances scaled down to minimum expected.")
             return True
         time.sleep(WAIT_INTERVAL)
         waited += WAIT_INTERVAL
-    print("❌ המכונות לא ירדו בזמן אחרי cooldown.")
+    print("❌ cooldown period exceeded, instances did not scale down to minimum expected.")
     return False
 
 # === MAIN FLOW ===
