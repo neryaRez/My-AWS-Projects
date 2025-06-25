@@ -187,25 +187,28 @@ def stop_stress(instance_ids):
 def check_scale_in(min_expected):
     start_time = time.time()
     last_logged_minute = -1
-    while waited < COOLDOWN_WAIT:
+    counter_minutes = 0
+    while True:
         ids = get_instance_ids()
         elapsed_time = time.time() - start_time
         current_minute = int(elapsed_time // 60)
-        if current_minute != last_logged_minute:
+
+        if counter_minutes >= 5:
+            log("❌ cooldown period exceeded, instances did not scale down to minimum expected.")
+            return False
+        
+        elif current_minute != last_logged_minute:
             log(f"waited {elapsed_time:.2f} seconds, current instance count: {len(ids)}")
             last_logged_minute = current_minute
+            counter_minutes += 1
+            time.sleep(WAIT_INTERVAL)
+            continue
+
         if len(ids) <= min_expected:
-            log("✅ scale-in  check passed, instances scaled down to minimum expected.")
+            log(f"✅ scale-in check passed, instance count is {len(ids)} (expected ≤ {min_expected})")
             return True
-        time.sleep(WAIT_INTERVAL)
-        waited += WAIT_INTERVAL
 
-        # Log debug info every 1 minute
-        if waited % 60 == 0:
-            log(f"waited {waited} seconds, still waiting for scale-in. Current count: {len(ids)} ")
-    log("❌ cooldown period exceeded, instances did not scale down to minimum expected.")
-    return False
-
+        
 # === MAIN FLOW ===
 
 log("🚀 Test starts")
