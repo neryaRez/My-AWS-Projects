@@ -92,14 +92,14 @@ def wait_for_scale_out(expected_count):
     log("❌ not enough instances after waiting for scale-out.")
     return []
 
-def cleanup_efs(instance_ids):
-    for iid in instance_ids:
-        ssm.send_command(
-            InstanceIds=[iid],
-            DocumentName="AWS-RunShellScript",
-            Parameters={"commands": ["rm -f /mnt/efs/*"]}
-        )
-        log(f"🧹 cleaned up /mnt/efs on {iid}")
+# def cleanup_efs(instance_ids):
+#     for iid in instance_ids:
+#         ssm.send_command(
+#             InstanceIds=[iid],
+#             DocumentName="AWS-RunShellScript",
+#             Parameters={"commands": ["rm -f /mnt/efs/*"]}
+#         )
+#         log(f"🧹 cleaned up /mnt/efs on {iid}")
 
 def write_to_efs(instance_ids):
     for iid in instance_ids:
@@ -119,7 +119,7 @@ def write_to_efs(instance_ids):
             log(f"⚠️ error has been occured on {iid}: {e}")
 
 def collect_mount_info(instance_ids):
-    cleanup_efs(instance_ids)  # Ensure the EFS is clean before collecting info
+    #cleanup_efs(instance_ids)  # Ensure EFS is clean before writing test files
     write_to_efs(instance_ids)  # Write a test file to EFS
     for iid in instance_ids:
         time.sleep(5)  # Avoid throttling by adding a small delay
@@ -185,10 +185,15 @@ def stop_stress(instance_ids):
             log(f"⚠️ error stopping stress on {iid}: {e}")
 
 def check_scale_in(min_expected):
-    waited = 0
+    start_time = time.time()
+    last_logged_minute = -1
     while waited < COOLDOWN_WAIT:
         ids = get_instance_ids()
-        
+        elapsed_time = time.time() - start_time
+        current_minute = int(elapsed_time // 60)
+        if current_minute != last_logged_minute:
+            log(f"waited {elapsed_time:.2f} seconds, current instance count: {len(ids)}")
+            last_logged_minute = current_minute
         if len(ids) <= min_expected:
             log("✅ scale-in  check passed, instances scaled down to minimum expected.")
             return True

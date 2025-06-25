@@ -60,7 +60,7 @@ def process_image():
             img = img.convert("L")
         processed_file_path = selected_file_path.replace(".", f"_{selected_operation}.", 1)
         img.save(processed_file_path)
-        print(f"Processed image saved as: {processed_file_path}")
+        log(f"Processed image saved as: {processed_file_path}")
     else:
         messagebox.showerror("Error", "Please select an image and an operation first.")
 
@@ -70,11 +70,11 @@ def choose_operation(op):
     process_image()
     if selected_operation:
         messagebox.showinfo("Operation Selected", f"Selected operation: {op}")
-    print(f"Image path: {selected_file_path}")
-    print(f"Operation: {selected_operation}")
+    log(f"Image path: {selected_file_path}")
+    log(f"Operation: {selected_operation}")
     if processed_file_path:
         upload_to_s3()
-        print(f"Uploading {processed_file_path} to S3 with operation {selected_operation}...")
+        log(f"Uploading {processed_file_path} to S3 with operation {selected_operation}...")
 
 def upload_to_s3():
     if not processed_file_path or not selected_operation:
@@ -87,10 +87,10 @@ def upload_to_s3():
 
     try:
         s3.upload_file(processed_file_path, bucket_name, object_name)
-        print(f"✅ File uploaded to S3: s3://{bucket_name}/{object_name}")
+        log(f"✅ File uploaded to S3: s3://{bucket_name}/{object_name}")
         messagebox.showinfo("Success", "Image uploaded to S3!")
     except Exception as e:
-        print(f"❌ Failed to upload: {e}")
+        log(f"❌ Failed to upload: {e}")
         messagebox.showerror("Upload Failed", f"{e}")
 
 
