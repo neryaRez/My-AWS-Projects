@@ -73,33 +73,29 @@ def checking_applying_stress(instance_ids):
     return success
 
 def wait_for_scale_out(expected_count):
-    waited = 0
-    while waited < MAX_SCALE_WAIT:
-        
-        ids = get_instance_ids() # counts the current amount of instances
+    start_time = time.time()
+    last_logged_minute = -1
+    counter_minutes = 0
+    while True:
+        ids = get_instance_ids()  # counts the current amount of instances
+        elapsed_time = time.time() - start_time
+        current_minute = int(elapsed_time // 60)
         
         if len(ids) >= expected_count:
+            log(f"✅ scale-out check passed, instance count is {len(ids)} (expected ≥ {expected_count})")
             return ids
+        
+        elif counter_minutes >= 5:
+            log("❌ cooldown period exceeded, instances did not scale out to expected count.")
+            return []
+
+        elif current_minute != last_logged_minute:
+            log(f"waited {elapsed_time:.2f} seconds, current instance count: {len(get_instance_ids())}")
+            last_logged_minute = current_minute
+            counter_minutes += 1
         
         checking_applying_stress(ids)  # Make sure stress is running, and if not, start it.
         time.sleep(WAIT_INTERVAL)
-        waited += WAIT_INTERVAL
-        
-        #loging debug info every 1 minute
-        if waited % 60 == 0:
-            log(f"waited {waited} seconds, still waiting for {expected_count} instances. Current count: {len(ids)} ")
-    
-    log("❌ not enough instances after waiting for scale-out.")
-    return []
-
-# def cleanup_efs(instance_ids):
-#     for iid in instance_ids:
-#         ssm.send_command(
-#             InstanceIds=[iid],
-#             DocumentName="AWS-RunShellScript",
-#             Parameters={"commands": ["rm -f /mnt/efs/*"]}
-#         )
-#         log(f"🧹 cleaned up /mnt/efs on {iid}")
 
 def write_to_efs(instance_ids):
     for iid in instance_ids:
@@ -172,19 +168,42 @@ def compare_mount_outputs(instance_ids):
 
     return True
 
-def stop_stress(instance_ids):
-    for iid in instance_ids:
+def stop_stress_on_instance(instance_id):
         try:
             ssm.send_command(
-                InstanceIds=[iid],
+                InstanceIds=[instance_id],
                 DocumentName="AWS-RunShellScript",
                 Parameters={"commands": ["pkill stress"]}
             )
-            log(f"🛑 stress stopped on {iid}")
+            log(f"🛑 stress stopped on {instance_id}")
         except Exception as e:
-            log(f"⚠️ error stopping stress on {iid}: {e}")
+            log(f"⚠️ error stopping stress on {instance_id}: {e}")
 
-def check_scale_in(min_expected):
+def checking_stopping_stress(instance_ids):
+    success = []
+    for iid in instance_ids:
+        time.sleep(5)  # Avoid throttling by adding a small delay
+        try:
+            resp = ssm.send_command(
+                InstanceIds=[iid],
+                DocumentName="AWS-RunShellScript",
+                Parameters={"commands": ["pgrep stress"]}
+            )
+            cmd_id = resp["Command"]["CommandId"]
+            time.sleep(5)  # Wait for command to execute
+            out = ssm.get_command_invocation(CommandId=cmd_id, InstanceId=iid)
+            if out["StandardOutputContent"].strip() == "":
+                success.append(iid)
+            else:
+                log(f"❌ stress is still running on {iid}")
+                stop_stress_on_instance(iid)
+
+        except ssm.exceptions.InvalidInstanceId as e:
+            log(f"⚠️ error has been occured on {iid}: {e}")
+    
+    return success
+
+def wait_for_scale_in(min_expected):
     start_time = time.time()
     last_logged_minute = -1
     counter_minutes = 0
@@ -192,8 +211,12 @@ def check_scale_in(min_expected):
         ids = get_instance_ids()
         elapsed_time = time.time() - start_time
         current_minute = int(elapsed_time // 60)
-
-        if counter_minutes >= 5:
+        
+        if len(ids) <= min_expected:
+            log(f"✅ scale-in check passed, instance count is {len(ids)} (expected ≤ {min_expected})")
+            return True
+        
+        elif counter_minutes >= 10:
             log("❌ cooldown period exceeded, instances did not scale down to minimum expected.")
             return False
         
@@ -201,14 +224,11 @@ def check_scale_in(min_expected):
             log(f"waited {elapsed_time:.2f} seconds, current instance count: {len(ids)}")
             last_logged_minute = current_minute
             counter_minutes += 1
-            time.sleep(WAIT_INTERVAL)
-            continue
-
-        if len(ids) <= min_expected:
-            log(f"✅ scale-in check passed, instance count is {len(ids)} (expected ≤ {min_expected})")
-            return True
-
         
+        checking_stopping_stress(ids)  # Make sure stress is stopped, and if not, stop it.
+        time.sleep(WAIT_INTERVAL)
+
+
 # === MAIN FLOW ===
 
 log("🚀 Test starts")
@@ -259,14 +279,12 @@ print("The actual data of the mount info is: ")
 print("========================================")
 print(get_s3_file(f"{PREFIX}/{final_ids[0]}.txt"))
 print("========================================")
+time.sleep(5)
 
 log("🛑 stopping stress to allow scale-in.")
-stop_stress(final_ids)
+log("🧘 waits ten minutes to cool down.")
 
-log("🧘 waits five minutes to cool down.")
-time.sleep(COOLDOWN_WAIT)
-
-check_scale_in(MIN_EXPECTED)
+wait_for_scale_in(MIN_EXPECTED)
 
 # Log the activity of the ASG in the terminal
 
