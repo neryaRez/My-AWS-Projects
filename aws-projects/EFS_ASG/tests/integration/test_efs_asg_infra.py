@@ -21,6 +21,37 @@ def log(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"{timestamp} - {message}")
 
+def update_asg_timings(asg_name, seconds):
+    try:
+        # 1. עדכון ה־DefaultInstanceWarmup של ה־ASG
+        asg.update_auto_scaling_group(
+            AutoScalingGroupName=asg_name,
+            DefaultInstanceWarmup=seconds
+        )
+        print(f"⚙️ DefaultInstanceWarmup set to {seconds} seconds")
+
+        # 2. עדכון EstimatedInstanceWarmup בפוליסות TargetTracking
+        policies = asg.describe_policies(AutoScalingGroupName=asg_name)["ScalingPolicies"]
+        for policy in policies:
+            if policy["PolicyType"] == "TargetTrackingScaling":
+                config = policy["TargetTrackingConfiguration"]
+
+                # בונים מחדש את הפוליסה עם EstimatedInstanceWarmup חדש
+                asg.put_scaling_policy(
+                    AutoScalingGroupName=asg_name,
+                    PolicyName=policy["PolicyName"],
+                    PolicyType="TargetTrackingScaling",
+                    TargetTrackingConfiguration=config,
+                    EstimatedInstanceWarmup=seconds
+                )
+                print(f"📈 TargetTracking '{policy['PolicyName']}' EstimatedInstanceWarmup set to {seconds} seconds")
+
+        print(f"✅ ASG warmup + policies updated to {seconds} seconds")
+        
+    except Exception as e:
+        print(f"❌ Error updating ASG timings: {e}")
+
+
 def clear_old_files():
     response = s3.list_objects_v2(Bucket=BUCKET, Prefix=PREFIX + "/")
     for obj in response.get("Contents", []):
@@ -50,7 +81,7 @@ def start_stress_on_instance(instance_id):
 def checking_applying_stress(instance_ids):
     success = []
     for iid in instance_ids:
-        time.sleep(5)  # Avoid throttling by adding a small delay
+        time.sleep(2)  # Avoid throttling by adding a small delay
         try:
             resp = ssm.send_command(
                 InstanceIds=[iid],
@@ -58,7 +89,7 @@ def checking_applying_stress(instance_ids):
                 Parameters={"commands": ["pgrep stress"]},
             )
             cmd_id = resp["Command"]["CommandId"]
-            time.sleep(5)  # Wait for command to execute
+            time.sleep(2)  # Wait for command to execute
             # Check the command invocation to see if stress is running
             out = ssm.get_command_invocation(CommandId=cmd_id, InstanceId=iid)
             if out["StandardOutputContent"].strip() != "":
@@ -99,7 +130,7 @@ def wait_for_scale_out(expected_count):
 
 def write_to_efs(instance_ids):
     for iid in instance_ids:
-        time.sleep(5)  # Avoid throttling by adding a small delay
+        time.sleep(2)  # Avoid throttling by adding a small delay
 
         try:
             ssm.send_command(
@@ -107,7 +138,7 @@ def write_to_efs(instance_ids):
                 DocumentName="AWS-RunShellScript",
                 Parameters={"commands": [f"echo 'This is a test file from instance $HOSTNAME' > /mnt/efs/testfile_{iid}.txt"]}
             )
-            time.sleep(5)
+            time.sleep(2)
             # Wait for the command to complete
             # Upload the test file to S3 for verification
             log(f"📄 test file written to EFS on {iid}.")
@@ -118,7 +149,7 @@ def collect_mount_info(instance_ids):
     #cleanup_efs(instance_ids)  # Ensure EFS is clean before writing test files
     write_to_efs(instance_ids)  # Write a test file to EFS
     for iid in instance_ids:
-        time.sleep(5)  # Avoid throttling by adding a small delay
+        time.sleep(2)  # Avoid throttling by adding a small delay
         try:
             filename = f"/tmp/{iid}-efs-check.txt"
             cmd = (
@@ -130,7 +161,7 @@ def collect_mount_info(instance_ids):
                 DocumentName="AWS-RunShellScript",
                 Parameters={"commands": [cmd]}
             )
-            time.sleep(10)  
+            time.sleep(2)  
             # Wait for the command to complete
             log(f"📂 mount info collected and uploaded for {iid}.")
         except Exception as e:
@@ -182,7 +213,7 @@ def stop_stress_on_instance(instance_id):
 def checking_stopping_stress(instance_ids):
     success = []
     for iid in instance_ids:
-        time.sleep(5)  # Avoid throttling by adding a small delay
+        time.sleep(2)  # Avoid throttling by adding a small delay
         try:
             resp = ssm.send_command(
                 InstanceIds=[iid],
@@ -190,7 +221,7 @@ def checking_stopping_stress(instance_ids):
                 Parameters={"commands": ["pgrep stress"]}
             )
             cmd_id = resp["Command"]["CommandId"]
-            time.sleep(5)  # Wait for command to execute
+            time.sleep(2)  # Wait for command to execute
             out = ssm.get_command_invocation(CommandId=cmd_id, InstanceId=iid)
             if out["StandardOutputContent"].strip() == "":
                 success.append(iid)
@@ -230,7 +261,8 @@ def wait_for_scale_in(min_expected):
 
 
 # === MAIN FLOW ===
-
+update_asg_timings(ASG_NAME,0) 
+time.sleep(3)  # Wait for the ASG to apply the new warmup and cooldown time
 log("🚀 Test starts")
 clear_old_files()
 
@@ -240,7 +272,7 @@ if not ids:
     exit(1)
 log(f"There are now  {len(ids)} instances in the ASG.")
 
-time.sleep(10)
+time.sleep(2)
 
 log("Checking if stress is running on instances, and if not apllys it...")
 log("⏳ waiting for scale out...")
@@ -279,7 +311,7 @@ print("The actual data of the mount info is: ")
 print("========================================")
 print(get_s3_file(f"{PREFIX}/{final_ids[0]}.txt"))
 print("========================================")
-time.sleep(5)
+time.sleep(2)
 
 log("🛑 stopping stress to allow scale-in.")
 log("🧘 waits ten minutes to cool down.")
@@ -287,6 +319,9 @@ log("🧘 waits ten minutes to cool down.")
 wait_for_scale_in(MIN_EXPECTED)
 
 # Log the activity of the ASG in the terminal
+update_asg_timings(ASG_NAME, 300)  # Restore the ASG warmup and cooldown to the default values
+log("⏱️ ASG warmup and cooldown restored to 300 seconds.")  
+time.sleep(3)  # Wait for the ASG to apply the new warmup and cooldown time
 
 print("The activity log of the ASG (last 5 minutes):")
 print("========================================")
@@ -309,6 +344,7 @@ else:
         print(f"End Time: {activity.get('EndTime', 'N/A')}")
         print(f"Status Code: {activity['StatusCode']}")
         print("========================================")
+        
 log("🎉 All the tests passed successfully!")
 
 # This script is designed to test the integration of an Auto Scaling Group (ASG) with an Amazon EFS file system.
