@@ -83,7 +83,7 @@ class AutoScalingGroupStack(Stack):
         user_data.add_commands(
             f"EFS_ID=\"{efs_id}\"",
             f"REGION=\"{self.region}\"",
-            "yum update -y",
+           # "yum update -y",
             "yum install -y nfs-utils amazon-efs-utils gcc make autoconf automake unzip curl",
             "yum install -y awscli",
 
@@ -141,7 +141,7 @@ class AutoScalingGroupStack(Stack):
         machine_image=ec2.AmazonLinuxImage(
         generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
         ),
-        key_name="your-key-pair-name",  # Replace with your key pair name
+        key_name="Nery-Pair",  # Replace with your key pair name
         security_group=sg,
         role=role,
         user_data=user_data
