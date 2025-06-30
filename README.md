@@ -1,4 +1,4 @@
-# ☁️ Nerya Reznikov's AWS Cloud Projects Portfolio
+# ☁️ Nerya Reznikovich's AWS Cloud Projects Portfolio
 
 Welcome to a curated showcase of my hands-on AWS cloud projects. Each project reflects real-world architectural patterns, automation practices, and integration of modern AWS services. All infrastructure is deployed with **CloudFormation** or **AWS CDK**, and each project includes custom validation, monitoring, and automation layers.
 
