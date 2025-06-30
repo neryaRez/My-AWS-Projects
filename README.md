@@ -71,7 +71,7 @@ Welcome to a curated showcase of my hands-on AWS cloud projects. Each project re
 
 🧪 Threaded, automated, verifiable testing of real scaling behavior.
 
-➡️ [See Full README]([See Full Readme](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/EFS_ASG#readme))
+➡️ [See Full README](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/EFS_ASG#readme)
 
 ---
 
