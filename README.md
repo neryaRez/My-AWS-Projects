@@ -17,7 +17,7 @@ Welcome to a curated showcase of my hands-on AWS cloud projects. Each project re
 
 🔐 Emphasis on private communication without bastion hosts.
 
-➡️ [See Full Readme](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/Cat%20Cloud%20Serverless%20App#readme)
+➡️ [See Full Readme](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/Secured%20Peering%20Connection-SSM#readme)
 
 ---
 
@@ -32,7 +32,7 @@ Welcome to a curated showcase of my hands-on AWS cloud projects. Each project re
 
 💡 Perfect pattern for secure, air-gapped environments.
 
-➡️ [See Full README](#)
+➡️ [See Full README](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/Private%20Subnet%20%20-%20SSM-EndPoints#readme)
 
 ---
 
@@ -52,7 +52,7 @@ Welcome to a curated showcase of my hands-on AWS cloud projects. Each project re
 
 🔔 Smart automation of event-based workflows with image-based triggers.
 
-➡️ [See Full README](#)
+➡️ [See Full README](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/Cat%20Cloud%20Serverless%20App#readme)
 
 ---
 
@@ -71,7 +71,7 @@ Welcome to a curated showcase of my hands-on AWS cloud projects. Each project re
 
 🧪 Threaded, automated, verifiable testing of real scaling behavior.
 
-➡️ [See Full README](#)
+➡️ [See Full README](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/EFS_ASG#readme)
 
 ---
 
