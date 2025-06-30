@@ -17,7 +17,7 @@ Welcome to a curated showcase of my hands-on AWS cloud projects. Each project re
 
 🔐 Emphasis on private communication without bastion hosts.
 
-➡️ [See Full README](#)
+➡️ [][See Full Readme](https://github.com/neryaRez/My-AWS-Projects/tree/main/aws-projects/Cat%20Cloud%20Serverless%20App#readme)(#)
 
 ---
 
