@@ -8,9 +8,9 @@ ec2 = boto3.client("ec2")
 ssm = boto3.client("ssm")
 asg = boto3.client("autoscaling")
 
-BUCKET = "asg-efs-checking"
+BUCKET = "put-your-bucket-name-here"  # Replace with your S3 bucket name
 PREFIX = "efs-check"
-ASG_NAME = "AutoScalingGroupStack-MyASG63588E97-y0tq7fAJ8My7"
+ASG_NAME = "put-your-asg-name-here"  # Replace with your Auto Scaling Group name
 EXPECTED = 4
 MIN_EXPECTED = 2
 WAIT_INTERVAL = 10

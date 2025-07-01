@@ -1,6 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: EC2 in private subnet with SSM access via VPC endpoints only
 
+Parameters:
+  KeyName:
+    Type: String
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances.
+    Default: put-your-key-pair-name-here
+
+  ImageId:
+    Type: String
+    Description: AMI ID for the EC2 instances.
+    Default: put-your-ami-id-here
+
 Resources:
 
   NVPC:
@@ -111,9 +122,9 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t3.micro
-      KeyName: Nery-Pair 
+      KeyName: put-your-key-pair-name-here 
       SubnetId: !Ref NPrivateSubnet
       IamInstanceProfile: !Ref S3SSMInstanceProfile
-      ImageId: ami-02457590d33d576c3
+      ImageId: put-your-ami-id-here
       SecurityGroupIds: [!Ref VPCEndpointSecurityGroup]
       Tags: [{ Key: Name, Value: PrivateEC2Instance }]

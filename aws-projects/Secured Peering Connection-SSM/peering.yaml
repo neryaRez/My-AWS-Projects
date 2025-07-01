@@ -1,6 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 2 VPCs, EC2s, VPC Peering, Routing, Internet, and SSM Access
 
+Parameters:
+  KeyName:
+    Type: String
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances.
+    Default: put-your-key-pair-name-here
+
+  ImageId:
+    Type: String
+    Description: AMI ID for the EC2 instances.
+    Default: put-your-ami-id-here
+
 Resources:
 
   VPC1:
@@ -143,20 +154,20 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t3.micro
-      KeyName: Nery-Pair
+      KeyName: put-your-key-pair-name-here
       SubnetId: !Ref Subnet1
       SecurityGroupIds: [!Ref SecurityGroup1]
-      ImageId: ami-02457590d33d576c3
+      ImageId: put-your-ami-id-here
       IamInstanceProfile: !Ref EC2SSMInstanceProfile1
 
   EC2Instance2:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t3.micro
-      KeyName: Nery-Pair
+      KeyName: put-your-key-pair-name-here
       SubnetId: !Ref Subnet2
       SecurityGroupIds: [!Ref SecurityGroup2]
-      ImageId: ami-02457590d33d576c3
+      ImageId: put-your-ami-id-here
 Outputs:
   PrivateIP1:
     Description: EC2 in VPC1

@@ -2,13 +2,40 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description:  S3 + Lambda + SNS + SQS , uploading system for cat pictures
 
+Parameters:
+  EmailAddress:
+    Type: String
+    Description: Email address to receive cat image notifications
+  BucketName:
+    Type: String
+    Description: Name of the S3 bucket to store cat images
+    Default: put-your-name-here-${AWS::AccountId}-${AWS::Region}
+    AllowedPattern: '^[a-z0-9.-]+$'
+    ConstraintDescription: Must be a valid S3 bucket name (lowercase letters, numbers, dots, and hyphens only).
 Resources:
 
   CatBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub cats-nerya-reznikov-${AWS::AccountId}-${AWS::Region}
-
+      BucketName: !Ref BucketName
+      publicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+    
+  CatBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CatBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${CatBucket.Arn}/*"
 
   S3Permission:
     Type: AWS::Lambda::Permission
@@ -166,7 +193,7 @@ Resources:
     Properties:
       TopicArn: !Ref CatTopic
       Protocol: email
-      Endpoint: neryarez@gmail.com
+      Endpoint: !Ref EmailAddress
 
   NotificationLambdaExecutionRole1:
     Type: AWS::IAM::Role

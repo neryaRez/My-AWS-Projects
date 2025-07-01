@@ -4,11 +4,15 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import boto3
-
+import time
 selected_file_path = None
 selected_operation = None
 processed_file_path = None
 drop_img = None
+
+def log(message):
+    """Log messages to the console."""
+    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {message}")
 
 def display_image(path):
     global selected_file_path, drop_img
@@ -33,9 +37,6 @@ def display_image(path):
         image_canvas.create_image(frame_width // 2, frame_height // 2, image=drop_img, anchor="center")
 
         image_canvas.image = drop_img  # שמור רפרנס
-
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to load image:\n{e}")
 
     except Exception as e:
         messagebox.showerror("Error", f"Failed to load image:\n{e}")
@@ -82,7 +83,7 @@ def upload_to_s3():
         return
 
     s3 = boto3.client('s3')
-    bucket_name = 'cats-nerya-reznikov-455715798206-us-east-1'
+    bucket_name = 'put-your-name-here'  # Replace with your bucket name
     object_name = f"{selected_operation}/{selected_file_path.split('/')[-1]}"
 
     try:

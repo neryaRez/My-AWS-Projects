@@ -141,7 +141,7 @@ class AutoScalingGroupStack(Stack):
         machine_image=ec2.AmazonLinuxImage(
         generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
         ),
-        key_name="Nery-Pair",  # Replace with your key pair name
+        key_name="your-key-name",  # Replace with your key pair name
         security_group=sg,
         role=role,
         user_data=user_data
